@@ -3,7 +3,9 @@ package com.formation.dao;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import com.formation.model.Client;
 
@@ -45,8 +47,43 @@ public class Dao implements Idao {
 
 	@Override
 	public Client findById(int id) {
-		// TODO Auto-generated method stub
-		return null;
+
+		Connection cn = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Client client = new Client();
+
+		try {
+
+			cn = connecter();
+
+			String sql = " SELECT * FROM client WHERE Id = ?";
+			st = cn.prepareStatement(sql);
+			st.setInt(1, id);
+			
+			rs = st.executeQuery();
+
+			while (rs.next()) {
+				System.out.print(rs.getString("nom") + " ");
+				System.out.println(rs.getString("prenom"));
+				client.setNom(rs.getString("nom"));
+				client.setPrenom(rs.getString("prenom"));
+				client.setAge(rs.getInt("age"));
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				cn.close();
+				st.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return client;
 	}
 
 	@Override
@@ -72,20 +109,21 @@ public class Dao implements Idao {
 		return cn;
 
 	}
-	
+
 	public static void main(String[] args) {
 		Client vincent = new Client();
 		vincent.setAge(52);
 		vincent.setPrenom("Vincent");
 		vincent.setNom("Machin");
 
-		
 		Client c = new Client("Truc", "Kalhed", 17);
-		
+
 		Idao dao = new Dao();
 		dao.save(vincent);
 		dao.save(c);
 		
-		
+		Client client = dao.findById(1);
+		System.out.println(client);
+
 	}
 }
